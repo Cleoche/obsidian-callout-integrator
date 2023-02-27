@@ -1,10 +1,10 @@
 {
-	"id": "line-indentor",
-	"name": "Line Indentor",
-	"version": "0.0.0",
-	"minAppVersion": "0.0.0",
+	"id": "obsidian-callout-integrator",
+	"name": "Callout Integrator for Obsidian",
+	"version": "1.0.1",
+	"minAppVersion": "1.1.15",
 	"description": "This plugin allows for easier integration of long blocks of text into callouts.",
-	"author": "Cléo Thor",
-	"authorUrl": "https://obsidian.md",
-	"isDesktopOnly": true
+	"author": "Cleoche",
+	"authorUrl": "https://github.com/Cleoche",
+	"isDesktopOnly": false
 }
