@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-callout-integrator",
-	"version": "1.0.1",
-	"description": "This plugin allows for easier integration of long blocks of text into callouts.",
+	"version": "1.0.2",
+	"description": "Integrate long blocks of text into callouts",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
