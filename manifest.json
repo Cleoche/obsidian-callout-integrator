@@ -1,9 +1,9 @@
 {
 	"id": "obsidian-callout-integrator",
 	"name": "Callout Integrator for Obsidian",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "1.1.15",
-	"description": "This plugin allows for easier integration of long blocks of text into callouts.",
+	"description": "Integrate long blocks of text into callouts",
 	"author": "Cleoche",
 	"authorUrl": "https://github.com/Cleoche",
 	"isDesktopOnly": false
