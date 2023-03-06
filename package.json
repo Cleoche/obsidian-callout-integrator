@@ -1,5 +1,5 @@
 {
-	"name": "obsidian-callout-integrator",
+	"name": "callout-integrator",
 	"version": "1.0.2",
 	"description": "Integrate long blocks of text into callouts",
 	"main": "main.js",
