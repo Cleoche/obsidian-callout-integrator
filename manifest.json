@@ -1,6 +1,6 @@
 {
 	"id": "callout-integrator",
-	"name": "Callout Integrator for Obsidian",
+	"name": "Callout Integrator",
 	"version": "1.0.2",
 	"minAppVersion": "1.1.15",
 	"description": "Integrate long blocks of text into callouts",
