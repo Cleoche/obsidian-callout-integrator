@@ -8,7 +8,7 @@ export default class calloutIntegrator extends Plugin {
 			id: 'callout-integrate',
 			name: 'integrate',
 			editorCallback: (editor: Editor) => {
-				var selection = editor.getSelection(); 									//gets highlighted selection
+				let selection = editor.getSelection(); 									//gets highlighted selection
 				if (selection != "") {													//make sure selection isn't empty
 					editor.replaceSelection("> " + selection.replace(/\n/g, "\n> ")); 	//adds "> " before each line; need the initial "> " separately as it doesn't register as a new line
 				}
@@ -18,7 +18,7 @@ export default class calloutIntegrator extends Plugin {
 			id: 'callout-unintegrate',
 			name: 'un-integrate',
 			editorCallback: (editor: Editor) => {
-				var selection2 = editor.getSelection(); 								//gets highlighted selection
+				let selection2 = editor.getSelection(); 								//gets highlighted selection
 				if (selection2.charAt(0) === '>') { 									// test if there is a ">" at the beginning of the selection
 					selection2 = selection2.substring(1); 								// cuts out the ">"
 					if (selection2.charAt(0) === ' ') {									//check for space at the beginning of the selection
