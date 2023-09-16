@@ -1,7 +1,7 @@
 {
 	"id": "callout-integrator",
 	"name": "Callout Integrator",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"minAppVersion": "1.1.15",
 	"description": "Integrate long blocks of text into callouts",
 	"author": "Cleoche",
