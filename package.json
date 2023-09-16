@@ -1,6 +1,6 @@
 {
 	"name": "callout-integrator",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"description": "Integrate long blocks of text into callouts",
 	"main": "main.js",
 	"scripts": {
