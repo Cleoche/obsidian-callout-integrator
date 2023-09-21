@@ -71,9 +71,8 @@ export default class calloutIntegrator extends Plugin {
 						}
 					}
 
-				if (sHead.line > sAnchor.line || 
-					sHead.line == sAnchor.line && 
-					sHead.ch > sAnchor.ch) {
+				if (sHead.line > sAnchor.line || sHead.line == sAnchor.line 
+					&& sHead.ch > sAnchor.ch) {
 
 					sHead.ch += movement;
 
