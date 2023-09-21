@@ -5,20 +5,6 @@ export default class calloutIntegrator extends Plugin {
 //I ran out of energy so I'll comment on this later I just want to push it
 	onload() {
 
-		function anchorhead(head: EditorPosition, anchor: EditorPosition): boolean {
-			if (head.line > anchor.line) {
-				return true;
-			} else if (head.line < anchor.line) {
-				return false;
-			} else {
-				if (head.ch > anchor.ch) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}
-
 		/*** ADDS "> " AT BEGINNING OF EACH LINE ***/
 		this.addCommand({
 			id: 'callout-integrate',
@@ -29,17 +15,23 @@ export default class calloutIntegrator extends Plugin {
 
 				if (editor.somethingSelected()) { //if text highlighted -> integrate whole block
 
-					let selectHead = editor.getCursor('head');							//gets beginning/end of highlighted section			
-					let selectAnchor = editor.getCursor('anchor');
+					let sHead = editor.getCursor('head');							//gets beginning/end of highlighted section			
+					let sAnchor = editor.getCursor('anchor');
 
 					editor.replaceSelection("> " + selection.replace(/\n/g, "\n> ")); 	//adds "> " before each line; need the initial "> " separately as it doesn't register as a new line
 
-					if (anchorhead(selectHead, selectAnchor)) {
-						selectHead.ch += 2;
+					if (sHead.line > sAnchor.line || sHead.line == sAnchor.line 
+						&& sHead.ch > sAnchor.ch) {
+
+						sHead.ch += 2;
+
 					} else {
-						selectAnchor.ch += 2;
+
+						sAnchor.ch += 2;
+
 					}
-					editor.setSelection(selectAnchor, selectHead);						//re-highlights text
+
+					editor.setSelection(sAnchor, sHead);						//re-highlights text
 
 				} else { //if no text highlighted -> integrate line containing cursor
 
@@ -62,8 +54,8 @@ export default class calloutIntegrator extends Plugin {
 
 				if (editor.somethingSelected()) { //if text highlighted -> remove all "> " following a line break
 
-					let selectHead = editor.getCursor('head');							//get beginning/end position of highlighted section
-					let selectAnchor = editor.getCursor('anchor');
+					let sHead = editor.getCursor('head');							//get beginning/end position of highlighted section
+					let sAnchor = editor.getCursor('anchor');
 					let movement = 0;
 
 					if (selection.charAt(0) === '>') { 									//find and cut initial ">"
@@ -79,14 +71,18 @@ export default class calloutIntegrator extends Plugin {
 						}
 					}
 
-				if (anchorhead(selectHead, selectAnchor)) {
-					selectHead.ch += movement;
+				if (sHead.line > sAnchor.line || 
+					sHead.line == sAnchor.line && 
+					sHead.ch > sAnchor.ch) {
+
+					sHead.ch += movement;
+
 				} else {
-					selectAnchor.ch += movement;
+					sAnchor.ch += movement;
 				}
 
 				editor.replaceSelection(selection.replace(/\n> /g, "\n")); 			// cuts every "> " occurring after a new line
-				editor.setSelection(selectAnchor, selectHead);						//re-highlight block
+				editor.setSelection(sAnchor, sHead);						//re-highlight block
 				
 				} else { //if no text highlighted -> cut "> " at beginning of line
 
