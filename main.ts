@@ -1,4 +1,4 @@
-import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Editor, EditorPosition, Plugin } from 'obsidian';
 
 
 export default class calloutIntegrator extends Plugin {
@@ -6,6 +6,7 @@ export default class calloutIntegrator extends Plugin {
 	onload() {
 		
 
+		// finds whether to move head or anchor and moves accordingly
 		function anchorHead(head: EditorPosition, anchor: EditorPosition, move: number): void {
 
 			if (head.line > anchor.line || head.line == anchor.line
@@ -17,6 +18,8 @@ export default class calloutIntegrator extends Plugin {
 
 		} // anchorHead()
 
+		// removes "> " at beginning of line and
+		// returns the amount the cursor needs to be moved
 		function unInt(line: string): [number, string] {
 
 			let move = 0;
@@ -45,12 +48,13 @@ export default class calloutIntegrator extends Plugin {
 		this.addCommand({
 			id: 'callout-integrate',
 			name: 'integrate',
+			icon: 'chevrons-right',
 			editorCallback: (editor: Editor) => {
 
 				if (editor.somethingSelected()) { // if text highlighted -> integrate selection
 
-					let sHead = editor.getCursor('head');
-					let sAnchor = editor.getCursor('anchor');
+					const sHead = editor.getCursor('head');
+					const sAnchor = editor.getCursor('anchor');
 
 					editor.replaceSelection("> " + editor.getSelection().replace(/\n/g, "\n> "));
 
@@ -59,7 +63,7 @@ export default class calloutIntegrator extends Plugin {
 
 				} else { // if no text highlighted -> integrate line containing cursor
 
-					let cursorPos = editor.getCursor();
+					const cursorPos = editor.getCursor();
 
 					editor.setLine(cursorPos.line, ("> " + editor.getLine(cursorPos.line)));
 					
@@ -75,14 +79,15 @@ export default class calloutIntegrator extends Plugin {
 		this.addCommand({
 			id: 'callout-unintegrate',
 			name: 'un-integrate',
+			icon: 'chevrons-left',
 			editorCallback: (editor: Editor) => {
 
 				if (editor.somethingSelected()) { //if text highlighted -> remove all "> " following a line break
 
-					let sHead = editor.getCursor('head');
-					let sAnchor = editor.getCursor('anchor');
+					const sHead = editor.getCursor('head');
+					const sAnchor = editor.getCursor('anchor');
 
-					let edited = unInt(editor.getSelection());
+					const edited = unInt(editor.getSelection());
 
 					editor.replaceSelection(edited[1].replace(/\n> /g, "\n"));
 				
@@ -91,9 +96,9 @@ export default class calloutIntegrator extends Plugin {
 				
 				} else { //if no text highlighted -> cut "> " at beginning of line
 
-					let cursorPos = editor.getCursor();
+					const cursorPos = editor.getCursor();
 
-					let edited2 = unInt(editor.getLine(cursorPos.line));
+					const edited2 = unInt(editor.getLine(cursorPos.line));
 					cursorPos.ch += edited2[0];
 
 					editor.setLine(cursorPos.line, edited2[1]);
@@ -102,7 +107,7 @@ export default class calloutIntegrator extends Plugin {
 				} // if/else
 
 			} // editorCallback
-		}) // callout-unintegrate
+		}) // callout-un-integrate
 
 	} // onload()
 
