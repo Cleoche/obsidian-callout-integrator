@@ -1,117 +1,137 @@
-import { Editor, EditorPosition, Plugin } from 'obsidian';
-
+import { Editor, EditorPosition, Plugin } from "obsidian";
 
 export default class calloutIntegrator extends Plugin {
 
-	onload() {
-		
+	onload():void {
 
-		// finds whether to move head or anchor and moves accordingly
-		function anchorHead(head: EditorPosition, anchor: EditorPosition, move: number): void {
+		// Returns two EditorPositions in order and a boolean that says whether or not the order was swapped
+		function order ( editor:Editor ):[EditorPosition, EditorPosition, boolean] {
 
-			if (head.line > anchor.line || head.line == anchor.line
-				&& head.ch > anchor.ch) {
+			const head:EditorPosition = editor.getCursor('head');
+			const anchor:EditorPosition = editor.getCursor('anchor');
 
-					head.ch += move;
+			if ( head.line < anchor.line || head.line == anchor.line && head.ch < anchor.ch )
+				return [head, anchor, false];
+			else
+				return [anchor, head, true];
 
-				} else {anchor.ch += move;}
+		}
 
-		} // anchorHead()
+		// Sets the selection after integrating/un-integrating
+		function setAnchorHead ( pos:[EditorPosition, EditorPosition, boolean], editor:Editor ):void {
 
-		// removes "> " at beginning of line and
-		// returns the amount the cursor needs to be moved
-		function unInt(line: string): [number, string] {
+			if ( pos[2] ) editor.setSelection( pos[0], pos[1] );
+			else editor.setSelection ( pos[1], pos[0] );
 
+		}
+
+		// Returns the un-integrated string, the updated EditorPosition, and how much the position was moved
+		function unInt ( editor:Editor, pos:EditorPosition ):[string, EditorPosition, number] {
+
+			let str:string = editor.getLine( pos.line );
 			let move = 0;
 
-			if (line.charAt(0) === '>') {
+			if ( str.charAt(0) === '>' ) {
 
-				line = line.substring(1);
+				str = str.substring(1);
 				move--;
 
-				if (line.charAt(0) === ' ') {
+				if ( pos.ch != 0 ) pos.ch --;
 
-					line = line.substring(1);
+				if ( str.charAt(0) === ' ' ) {
+
+					str = str.substring(1);
 					move--;
 
-				} // if(' ')
+					if ( pos.ch !=0 ) pos.ch --;
 
-			} // if('>')
+				}
+			}
 
-			return [move, line];
+			return [str, pos, move];
 
-		} // unInt()
+		}
 
+		// Integrates the line containing the cursor
+		function intNoSelection ( editor:Editor ):void {
 
+			const pos:EditorPosition = editor.getCursor();
+			editor.setLine( pos.line, ( '> ' + editor.getLine( pos.line ) ) );
+			if ( pos.ch != 0 ) editor.setCursor( { line:pos.line, ch:pos.ch+2 } );
 
-		/*** ADDS "> " AT BEGINNING OF EACH LINE ***/
+		}
+
+		// Integrates a selection of text
+		function intSelection ( editor:Editor ):void {
+
+			const pos:[EditorPosition, EditorPosition, boolean] = order(editor);
+
+			if ( pos[0].line-pos[1].line != 0 )
+				editor.replaceSelection(editor.getSelection().replace(/\n/g, "\n> "));
+
+			editor.setLine( pos[0].line, ( '> ' + editor.getLine( pos[0].line ) ) );
+
+			if ( pos[0].ch != 0 ) pos[0].ch += 2;
+			pos[1].ch += 2;
+
+			setAnchorHead( pos, editor );
+		}
+
+		// Un-integrates the line containing the cursor
+		function unIntNoSelection ( editor:Editor ): void {
+
+			const pos:EditorPosition = editor.getCursor();
+			const thisLine:[string, EditorPosition, number] = unInt( editor, pos );
+			editor.setLine( pos.line, thisLine[0] );
+			editor.setCursor( thisLine[1] );
+
+		}
+
+		// Un-integrates a selection of text
+		function unIntSelection ( editor:Editor ):void {
+
+			const pos:[EditorPosition, EditorPosition, boolean] = order(editor);
+			const firstLine:[string, EditorPosition, number] = unInt( editor, pos[0] );
+			const lastLine:[string, EditorPosition, number] = unInt( editor, pos[1] );
+
+			pos[0] = firstLine[1];
+			pos[1] = lastLine[1];
+
+			if ( pos[0].line != pos[1].line ) {
+
+				if ( pos[1].line - pos[0].line > 1 )
+					editor.replaceSelection( editor.getSelection().replace( /\n> /g, "\n" ) );
+
+				editor.setLine( lastLine[1].line, lastLine[0] );
+			}
+
+			editor.setLine( firstLine[1].line, firstLine[0] );
+			setAnchorHead( pos, editor );
+		}
+
 		this.addCommand({
 			id: 'callout-integrate',
 			name: 'integrate',
 			icon: 'chevrons-right',
-			editorCallback: (editor: Editor) => {
+			editorCallback: ( editor:Editor ):void => {
 
-				if (editor.somethingSelected()) { // if text highlighted -> integrate selection
+				if ( !editor.somethingSelected() ) intNoSelection(editor);
+				else intSelection(editor);
 
-					const sHead = editor.getCursor('head');
-					const sAnchor = editor.getCursor('anchor');
-
-					editor.replaceSelection("> " + editor.getSelection().replace(/\n/g, "\n> "));
-
-					anchorHead(sHead, sAnchor, 2);
-					editor.setSelection(sAnchor, sHead);
-
-				} else { // if no text highlighted -> integrate line containing cursor
-
-					const cursorPos = editor.getCursor();
-
-					editor.setLine(cursorPos.line, ("> " + editor.getLine(cursorPos.line)));
-					
-					cursorPos.ch += 2;
-					editor.setCursor(cursorPos);
-
-				} // if/else
-
-			} // editorCallback
-		}) // callout-integrate
-
+			}
+		})
 
 		this.addCommand({
 			id: 'callout-unintegrate',
 			name: 'un-integrate',
 			icon: 'chevrons-left',
-			editorCallback: (editor: Editor) => {
+			editorCallback: ( editor:Editor ):void => {
 
-				if (editor.somethingSelected()) { //if text highlighted -> remove all "> " following a line break
+				if ( !editor.somethingSelected() ) unIntNoSelection(editor);
+				else unIntSelection(editor);
+			}
+		})
+	}
 
-					const sHead = editor.getCursor('head');
-					const sAnchor = editor.getCursor('anchor');
-
-					const edited = unInt(editor.getSelection());
-
-					editor.replaceSelection(edited[1].replace(/\n> /g, "\n"));
-				
-					anchorHead(sHead, sAnchor, edited[0]);
-					editor.setSelection(sAnchor, sHead);
-				
-				} else { //if no text highlighted -> cut "> " at beginning of line
-
-					const cursorPos = editor.getCursor();
-
-					const edited2 = unInt(editor.getLine(cursorPos.line));
-					cursorPos.ch += edited2[0];
-
-					editor.setLine(cursorPos.line, edited2[1]);
-					editor.setCursor(cursorPos);
-					
-				} // if/else
-
-			} // editorCallback
-		}) // callout-un-integrate
-
-	} // onload()
-
-	onunload() {
-
-	} // onunload()
+	onunload():void {}
 }
