@@ -56,8 +56,12 @@ export default class calloutIntegrator extends Plugin {
 		function intNoSelection ( editor:Editor ):void {
 
 			const pos:EditorPosition = editor.getCursor();
-			editor.setLine( pos.line, ( '> ' + editor.getLine( pos.line ) ) );
-			if ( pos.ch != 0 ) editor.setCursor( { line:pos.line, ch:pos.ch+2 } );
+			const thisLine:string = editor.getLine( pos.line );
+
+			editor.setLine( pos.line, ( '> ' + thisLine ) );
+
+			if ( pos.ch != 0 || thisLine.charAt(0) != '>' )
+				editor.setCursor( { line:pos.line, ch:pos.ch+2 } );
 
 		}
 
